@@ -570,11 +570,11 @@ class ReactExoplayerView extends FrameLayout implements
     // }
 
     // Added to manage specific DRM with WIDEVINE
-    private DrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManager() throws UnsupportedDrmException {
+    private DrmSessionManager buildDrmSessionManager() throws UnsupportedDrmException {
         DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory("sctv", null);
         TiMPMediaDrmCallback drmCallback = new TiMPMediaDrmCallback(this.drmLicenseUrl, deviceId, customerId, httpDataSourceFactory);
         FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(this.drmUUID);
-        return new DefaultDrmSessionManager<>(this.drmUUID, mediaDrm, drmCallback, null);
+        return new DefaultDrmSessionManager(this.drmUUID, mediaDrm, drmCallback, null);
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
