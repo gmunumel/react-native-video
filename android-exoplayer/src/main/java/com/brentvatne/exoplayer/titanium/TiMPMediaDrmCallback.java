@@ -93,6 +93,8 @@ public class TiMPMediaDrmCallback implements MediaDrmCallback {
         DataSourceInputStream inputStream = new DataSourceInputStream(dataSource, dataSpec);
         try {
             return Util.toByteArray(inputStream);
+        } catch (MediaDrmCallbackException e) {
+            e.printStackTrace();
         } finally {
             Util.closeQuietly(inputStream);
         }
