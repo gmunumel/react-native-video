@@ -81,7 +81,7 @@ public class TiMPMediaDrmCallback implements MediaDrmCallback {
     }
 
     private static byte[] executePost(HttpDataSource.Factory dataSourceFactory, String url,
-                                      byte[] data, Map<String, String> requestProperties) throws MediaDrmCallbackException {
+                                      byte[] data, Map<String, String> requestProperties) throws IOException  {
         HttpDataSource dataSource = dataSourceFactory.createDataSource();
         if (requestProperties != null) {
             for (Map.Entry<String, String> requestProperty : requestProperties.entrySet()) {
@@ -91,10 +91,10 @@ public class TiMPMediaDrmCallback implements MediaDrmCallback {
         DataSpec dataSpec = new DataSpec(Uri.parse(url), data, 0, 0, C.LENGTH_UNSET, null,
                 DataSpec.FLAG_ALLOW_GZIP);
         DataSourceInputStream inputStream = new DataSourceInputStream(dataSource, dataSpec);
-        byte[] result;
+        byte[] result = null;
         try {
             result = Util.toByteArray(inputStream);
-        } catch (MediaDrmCallbackException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             Util.closeQuietly(inputStream);
