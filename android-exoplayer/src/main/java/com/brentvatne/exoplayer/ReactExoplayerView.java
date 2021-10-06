@@ -15,6 +15,10 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+// Added imports
+import com.brentvatne.exoplayer.bitrate.BitrateAdaptionPreset;
+import com.brentvatne.exoplayer.titanium.TiMPMediaDrmCallback;
+// End added imports
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
@@ -157,6 +161,11 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private boolean controls;
+
+    // Added parameters
+    private String customerId = null;
+    private String deviceId = null;
+    // End parameters
     // \ End props
 
     // React
@@ -211,6 +220,45 @@ class ReactExoplayerView extends FrameLayout implements
     public void setId(int id) {
         super.setId(id);
         eventEmitter.setViewId(id);
+    }
+
+    /**
+     * @param drmName DRM type ('widevine', 'playready' or 'cenc')
+     * @param licenseUrl DRM license uri
+     * @param customerId customerId
+     * @param deviceId deviceId or portalId
+     */
+    public void setDrm(String drmName, String licenseUrl, String customerId, String deviceId) {
+        Log.d(TAG, "setDrm");
+        Log.d(TAG, "drmName " + drmName);
+        Log.d(TAG, "licenseUrl " + licenseUrl);
+        Log.d(TAG, "customerId " + customerId);
+        Log.d(TAG, "deviceId " + deviceId);
+        this.drmUUID = C.UUID_NIL;
+        if (drmName != null) {
+            switch (Util.toLowerInvariant(drmName)) {
+                case "widevine":
+                    this.drmUUID = C.WIDEVINE_UUID;
+                    break;
+                case "playready":
+                    this.drmUUID = C.PLAYREADY_UUID;
+                    break;
+                case "cenc":
+                    this.drmUUID = C.CLEARKEY_UUID;
+                    break;
+                default:
+                    try {
+                        this.drmUUID = UUID.fromString(drmName);
+                    } catch (RuntimeException e) {
+                        String errorString = "Unsupported drm type: " + drmName;
+                        eventEmitter.error(errorString, e);
+                    }
+            }
+        }
+        this.drmLicenseUrl = licenseUrl;
+        this.customerId = customerId;
+        this.deviceId = deviceId;
+        initializePlayer();
     }
 
     private void createViews() {
@@ -395,7 +443,20 @@ class ReactExoplayerView extends FrameLayout implements
             @Override
             public void run() {
                 if (player == null) {
-                    ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
+                    // need drmUUID to initialize DRM session manager
+                    if (drmUUID == null) {
+                        return;
+                    }
+
+                    BitrateAdaptionPreset preset = config.getBitrateAdaptionPreset();
+                    //ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
+                    // Added bitrate config
+                    TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(
+                            preset.minDurationForQualityIncreaseMs(),
+                            preset.maxDurationForQualityDecreaseMs(),
+                            preset.minDurationToRetainAfterDiscardMs(),
+                            preset.bandwidthFraction()
+                    );
                     trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
                     trackSelector.setParameters(trackSelector.buildUponParameters()
                             .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
@@ -432,14 +493,26 @@ class ReactExoplayerView extends FrameLayout implements
                     // DRM
                     DrmSessionManager drmSessionManager = null;
                     if (self.drmUUID != null) {
+                        // try {
+                        //     drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
+                        //             self.drmLicenseHeader);
+                        // } catch (UnsupportedDrmException e) {
+                        //     int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
+                        //             : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
+                        //             ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
+                        //     eventEmitter.error(getResources().getString(errorStringId), e);
+                        //     return;
+                        // }
+
+                        // Added customize DRM handling
                         try {
-                            drmSessionManager = buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
-                                    self.drmLicenseHeader);
+                            drmSessionManager = buildDrmSessionManager();
                         } catch (UnsupportedDrmException e) {
-                            int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
-                                    : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
+                            int errorStringId = (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
                                     ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
-                            eventEmitter.error(getResources().getString(errorStringId), e);
+                            String errorMsg = getResources().getString(errorStringId);
+                            Log.d("Drm Info", getResources().getString(errorStringId));
+                            eventEmitter.error(errorMsg, e);
                             return;
                         }
                     }
@@ -478,21 +551,29 @@ class ReactExoplayerView extends FrameLayout implements
         }, 1);
     }
 
-    private DrmSessionManager buildDrmSessionManager(UUID uuid,
-                                                                           String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
-        if (Util.SDK_INT < 18) {
-            return null;
-        }
-        HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
-                buildHttpDataSourceFactory(false));
-        if (keyRequestPropertiesArray != null) {
-            for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
-                drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i],
-                        keyRequestPropertiesArray[i + 1]);
-            }
-        }
-        return new DefaultDrmSessionManager(uuid,
-                FrameworkMediaDrm.newInstance(uuid), drmCallback, null, false, 3);
+    // private DrmSessionManager buildDrmSessionManager(UUID uuid,
+    //                                                                        String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
+    //     if (Util.SDK_INT < 18) {
+    //         return null;
+    //     }
+    //     HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
+    //             buildHttpDataSourceFactory(false));
+    //     if (keyRequestPropertiesArray != null) {
+    //         for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
+    //             drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i],
+    //                     keyRequestPropertiesArray[i + 1]);
+    //         }
+    //     }
+    //     return new DefaultDrmSessionManager(uuid,
+    //             FrameworkMediaDrm.newInstance(uuid), drmCallback, null, false, 3);
+    // }
+
+    // Added to manage specific DRM with WIDEVINE
+    private DrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManager() throws UnsupportedDrmException {
+        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory("sctv", null);
+        TiMPMediaDrmCallback drmCallback = new TiMPMediaDrmCallback(this.drmLicenseUrl, deviceId, customerId, httpDataSourceFactory);
+        FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(this.drmUUID);
+        return new DefaultDrmSessionManager<>(this.drmUUID, mediaDrm, drmCallback, null);
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
