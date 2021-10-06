@@ -71,6 +71,14 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
 
+    // Added DRM global variables
+    private static final String PROP_SRC_DRM = "drm";
+    private static final String PROP_DRM_DEVICE_ID = "deviceId";
+    private static final String PROP_DRM_CUSTOMER_ID = "customerId";
+    private static final String PROP_DRM_LICENSE_URL = "licenseUrl";
+    private static final String PROP_DRM_TYPE = "drmType";
+    // End DRM global variables
+
     private ReactExoplayerConfig config;
 
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
@@ -147,6 +155,18 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             videoView.clearSrc();
             return;
         }
+
+        // Added Setup DRM
+        String drmType = null, licenseUrl = null, customerId = null, deviceId = null;
+        if (drm != null) {
+            drmType = drm.containsKey(PROP_DRM_TYPE) ? drm.get(PROP_DRM_TYPE) : null;
+            licenseUrl = drm.containsKey(PROP_DRM_LICENSE_URL) ? drm.get(PROP_DRM_LICENSE_URL) : null;
+            customerId = drm.containsKey(PROP_DRM_CUSTOMER_ID) ? drm.get(PROP_DRM_CUSTOMER_ID) : null;
+            deviceId = drm.containsKey(PROP_DRM_DEVICE_ID) ? drm.get(PROP_DRM_DEVICE_ID) : null;
+        }
+
+        videoView.setDrm(drmType, licenseUrl, customerId, deviceId);
+        // End setup DRM
 
         if (startsWithValidScheme(uriString)) {
             Uri srcUri = Uri.parse(uriString);
