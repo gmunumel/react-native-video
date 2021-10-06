@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 // Added imports
 import com.brentvatne.exoplayer.bitrate.BitrateAdaptionPreset;
 import com.brentvatne.exoplayer.titanium.TiMPMediaDrmCallback;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 // End added imports
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
@@ -451,7 +452,7 @@ class ReactExoplayerView extends FrameLayout implements
                     BitrateAdaptionPreset preset = config.getBitrateAdaptionPreset();
                     //ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
                     // Added bitrate config
-                    TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(
+                    ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(
                             preset.minDurationForQualityIncreaseMs(),
                             preset.maxDurationForQualityDecreaseMs(),
                             preset.minDurationToRetainAfterDiscardMs(),

@@ -36,16 +36,9 @@ public class TiMPMediaDrmCallback implements MediaDrmCallback {
         this.portalId = portalId;
         this.customerName = customerName;
         this.dataSourceFactory = dataSourceFactory;
-
-        Log.d(TAG, "TiMPMediaDrmCallback");
-        Log.d(TAG, "defaultLicenseUrl " + defaultLicenseUrl);
-        Log.d(TAG, "portalId " + portalId);
-        Log.d(TAG, "customerName " + customerName);
-        Log.d(TAG, "dataSourceFactory " + dataSourceFactory);
     }
 
     private String createLatensRegistration(byte[] payload) {
-        Log.d(TAG, "createLatensRegistration");
         TiMPDeviceInfo deviceInfo = new TiMPDeviceInfo();
         TiMPRegistration tiMPRegistration = new TiMPRegistration();
         tiMPRegistration.customerName = this.customerName;
@@ -76,7 +69,6 @@ public class TiMPMediaDrmCallback implements MediaDrmCallback {
     public byte[] executeKeyRequest(UUID uuid, ExoMediaDrm.KeyRequest request) throws Exception {
         String url = defaultLicenseUrl;
         String requestBody = createLatensRegistration(request.getData());
-        //String requestBody = "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIiwia2lkIjoiOTMyMjJmMTItYzdjZi00ZWE2LTgwMzAtNDgyMDUyOWFkNjE3IiwiaXNzIjoiTXVsdGlUcnVzdCIsImV4cCI6IjE2MzMwODY4NjU5NzMiLCJpYXQiOiIxNjMzMDg2ODA1OTczIiwidmVyIjoiMiJ9Cg.XaRaY3_LIs8WBehhfBkLog.UAMxsosW5pBewSfHYKlatg.faLV1f5U6yOI1IrGCHLMebM3E_0HARbwenGOtsZGSfeBIZWIjk64TbMs21LOD4dxM6ExfTa1BsorTKyMOlOV9R7Ex37t7dRSvlYF9wsc_3LBhQSy7L8mIkdUsSZCjPGmoA_quwj5gX55MGWD12rawygG8uTqNVGZ5ZtDdOK6Vmmfap4O-mr37e1rJhh0U_SWMCOV53tnZQSP85K4XtBWFZvamoEamFBnIOxHTDQmC2KiVEm35KFV2PiblbYfBdR2ONRRq3JncmQpB5l5teryj8_HhCHXBOkc8PwN19_p-RuMhbMKQN3FdvVFxnvGYu168fVKRLO6rg9nxyOjioUWKFuUDnKaI_Bl1rFFs72llvNR_gZR_xZ2vZMnbPLROVolMLNR_m3PeF-_0DdxSIKdwMC-I9avrVTaytCpkQZbqI1da_lLowBv1rMxePAslkJWTr8pHLlGKyiq7B8NW4pg1xXQlTzU6HIKFigVThmipIPd8_EWwgM9A8_e5wFjJ_8hfi8W9FcYlUaKk4TTsQIlq6K9Rqmq2nenEqiVruBLQcyhDyquQ8Qbr0TSi2eUEZTwrtfZcSzD5lQqyAneWs3LPjLQxYBQiKP4qxpO0nLQLucxkYz0dtiu8_Q66pPmc687BD7b-RURte_g1N57f2dEqg5Zfe2GD1E58DtnRMk0SLVH1kPKmBzfICuXapRfK7cBv58MkM_tserG_G5T_61z2I6Pp3CxgVh3qEn2gbIur989rJoiVkjHOgcba3LRu2XijsjGMFwG5jAOlumC26BT-LfutA5m9QxFo07MzQL0bzPs7Kl-3pbl9DF9IjCA7tO7MruL7-50BriBwpQjfrevO9q3Wvg3296eG6wNiLglacvYRlH6FHYqYdKEliOz6Asm4MfFzq9AuHIDa3b_t0lij6b8Ie5vg5ssR75uKaGevmJB0GjLGZ2HSerj_B3KrzE944A4ziX3lxiEB2sOnhlJPTWlqPg7Wx9KozuxhgOEUSrXFwaWGwMuUsfqIVOicI3o5R17THu1JymBzKyCfzVoKeMo_b2-2jSqYqsWszuKEGELdtnRNhBOzEQhq1kuJMwRrdWdUqJJrLRjqGMq2FG1dPYVpsLGHofS8Pd02wZjRI1fZPDZHh8Kng82icD9zajdNMQOKC8Rkml33myL_cIc7KAD9mmrINoC5egB7p0mlQyCLA_QfLQfn7MWYK-gKsOziXXVP3m1zKhSA7gbzsj1.MC4HKn4hGlFPRbdM7ngFqA";
         byte[] keyResponse = executePost(dataSourceFactory, url, requestBody.getBytes(), null);
         Gson gson = new Gson();
         String response = new String(keyResponse);

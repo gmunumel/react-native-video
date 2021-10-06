@@ -41,5 +41,5 @@ dependencies {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
     implementation 'com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}'
-
+    implementation 'com.google.code.gson:gson:2.8.5'
 }

@@ -76,7 +76,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_DRM_DEVICE_ID = "deviceId";
     private static final String PROP_DRM_CUSTOMER_ID = "customerId";
     private static final String PROP_DRM_LICENSE_URL = "licenseUrl";
-    private static final String PROP_DRM_TYPE = "drmType";
     // End DRM global variables
 
     private ReactExoplayerConfig config;
@@ -150,6 +149,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+        // Added drm variable
+        Map<String, String> drm = src.hasKey(PROP_SRC_DRM) ? toStringMap(src.getMap(PROP_SRC_DRM)) : null;
 
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
