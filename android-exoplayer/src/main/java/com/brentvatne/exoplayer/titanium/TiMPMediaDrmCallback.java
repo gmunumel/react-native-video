@@ -8,6 +8,10 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.drm.ExoMediaDrm;
 import com.google.android.exoplayer2.drm.MediaDrmCallback;
 
+// Added import
+import com.google.android.exoplayer2.drm.MediaDrmCallbackException;
+// End import
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -60,13 +64,13 @@ public class TiMPMediaDrmCallback implements MediaDrmCallback {
     }
 
     @Override
-    public byte[] executeProvisionRequest(UUID uuid, ExoMediaDrm.ProvisionRequest request) throws IOException {
+    public byte[] executeProvisionRequest(UUID uuid, ExoMediaDrm.ProvisionRequest request) throws MediaDrmCallbackException {
         String url = request.getDefaultUrl() + "&signedRequest=" + new String(request.getData());
         return executePost(dataSourceFactory, url, new byte[0], null);
     }
 
     @Override
-    public byte[] executeKeyRequest(UUID uuid, ExoMediaDrm.KeyRequest request) throws Exception {
+    public byte[] executeKeyRequest(UUID uuid, ExoMediaDrm.KeyRequest request) throws MediaDrmCallbackException {
         String url = defaultLicenseUrl;
         String requestBody = createLatensRegistration(request.getData());
         byte[] keyResponse = executePost(dataSourceFactory, url, requestBody.getBytes(), null);
