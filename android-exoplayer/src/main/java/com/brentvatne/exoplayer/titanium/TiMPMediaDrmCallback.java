@@ -91,12 +91,14 @@ public class TiMPMediaDrmCallback implements MediaDrmCallback {
         DataSpec dataSpec = new DataSpec(Uri.parse(url), data, 0, 0, C.LENGTH_UNSET, null,
                 DataSpec.FLAG_ALLOW_GZIP);
         DataSourceInputStream inputStream = new DataSourceInputStream(dataSource, dataSpec);
+        byte[] result;
         try {
-            return Util.toByteArray(inputStream);
+            result = Util.toByteArray(inputStream);
         } catch (MediaDrmCallbackException e) {
             e.printStackTrace();
         } finally {
             Util.closeQuietly(inputStream);
         }
+        return result;
     }
 }
