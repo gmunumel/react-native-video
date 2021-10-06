@@ -450,9 +450,9 @@ class ReactExoplayerView extends FrameLayout implements
                     }
 
                     BitrateAdaptionPreset preset = config.getBitrateAdaptionPreset();
-                    //TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
+                    //ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
                     // Added bitrate config
-                    TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(
+                    ExoTrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(
                             preset.minDurationForQualityIncreaseMs(),
                             preset.maxDurationForQualityDecreaseMs(),
                             preset.minDurationToRetainAfterDiscardMs(),
